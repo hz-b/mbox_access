@@ -35,8 +35,40 @@ TypeDef neutrondef(TypeCode::Struct, "structure",
     }),
 });
 
+
+static void help(const char *name)
+{
+    cout << "USAGE: " << name << " [options]" << endl;
+    cout << "  -h        : Help" << endl;
+    cout << "  -d seconds: Delay between packages (default 0.01)" << endl;
+    cout << "  -e count  : Max event count per packet (default 10)" << endl;
+}
+
 int main(int argc, char* argv[])
 {
+    double delay = 0.01;
+    size_t event_count = 10;
+
+    int opt;
+    while ((opt = getopt(argc, argv, "d:e:h")) != -1)
+    {
+        switch (opt)
+        {
+            case 'd':
+                delay = atof(optarg);
+                break;
+            case 'e':
+                event_count = (size_t)atol(optarg);
+                break;
+            case 'h':
+                help(argv[0]);
+                return 0;
+            default:
+                help(argv[0]);
+                return -1;
+        }
+    }
+
     logger_config_env();
 
     std::string pv_name = "neutrons";
@@ -59,7 +91,7 @@ int main(int argc, char* argv[])
     SigInt handle( [&done] ()  { done.trigger(); });
     unsigned long id = 0;
     epicsTimeStamp now;
-    while (! done.wait(1))
+    while (! done.wait(delay))
     {
       ++id;
       epicsTimeGetCurrent(&now);
@@ -69,6 +101,19 @@ int main(int argc, char* argv[])
       val["proton_charge.value"] = (1 + id % 10)*1e8;
       val["timeStamp.secondsPastEpoch"] = now.secPastEpoch;
       val["timeStamp.nanoseconds"] = now.nsec;
+
+      size_t count = event_count;
+      shared_array<unsigned int> tof(count);
+      for (int i=0; i<count; ++i)
+          tof[i] = id;
+      val["time_of_flight.value"] = tof.freeze().castTo<const void>();
+
+      shared_array<unsigned int> pxl(count);
+      unsigned int value = id*10;
+      for (size_t i=0; i<count; ++i)
+          pxl[i] = value;
+      val["pixel.value"] = pxl.freeze().castTo<const void>();
+
       pv.post(std::move(val));
     }
 
