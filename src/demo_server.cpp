@@ -12,20 +12,22 @@
 using namespace pvxs;
 using namespace std;
 
+TypeDef neutrondef(TypeCode::Struct, "simple_t", {
+                Member(TypeCode::Float64, "value"),
+                Member(TypeCode::Struct, "timeStamp", "time_t", {
+                    Member(TypeCode::UInt64, "secondsPastEpoch"),
+                    Member(TypeCode::UInt32, "nanoseconds"),
+                }),
+            });
+
 int main(int argc, char* argv[])
 {
     // To show detail,  `export PVXS_LOG=*=DEBUG`
     logger_config_env();
 
-    std::string pv_name = "test";
+    std::string pv_name = "neutrons";
 
-    // Use pre-canned definition of scalar with meta-data
-    Value initial = nt::NTScalar{TypeCode::Float64}.create();
-    initial["value"] = 42.0;
-    initial["alarm.severity"] = 0;
-    initial["alarm.status"] = 0;
-    initial["alarm.message"] = "";
-
+    Value initial = neutrondef.create();
     server::SharedPV pv(server::SharedPV::buildReadonly());
     pv.open(initial);
 
@@ -43,10 +45,14 @@ int main(int argc, char* argv[])
     SigInt handle( [&done] ()  { done.trigger(); });
 
     int count = 42;
-    while (! done.wait(1.0))
+    epicsTimeStamp now;
+    while (! done.wait(1))
     {
+      epicsTimeGetCurrent(&now);
       auto val = initial.cloneEmpty();
       val["value"] = ++count;
+      val["timeStamp.secondsPastEpoch"] = now.secPastEpoch;
+      val["timeStamp.nanoseconds"] = now.nsec;
       pv.post(std::move(val));
     }
 
