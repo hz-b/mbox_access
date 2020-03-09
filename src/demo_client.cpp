@@ -8,7 +8,6 @@
 using namespace std;
 using namespace pvxs;
 
-epicsEvent done;
 
 int main()
 {
@@ -19,13 +18,14 @@ int main()
     cout << "Hi!" << endl;
 
     client::Context ctxt = client::Config::from_env().build();
+    epicsEvent done;
     auto op = ctxt.get("demo")
                   //.pvRequest(request)
-                  .result([](client::Result&& result)
-                        {
-                          cout << result() << endl;
-                          done.signal();
-                        })
+                  .result([&done](client::Result&& result)
+                          {
+                            cout << result() << endl;
+                            done.signal();
+                          })
                   .exec();
 
     ctxt.hurryUp();

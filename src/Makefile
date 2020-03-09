@@ -6,8 +6,11 @@ include $(TOP)/configure/CONFIG
 #=============================
 
 
-PROD += demo
-demo_SRCS += demo.cpp
+PROD += demo_client
+demo_client_SRCS += demo_client.cpp
+
+PROD += demo_server
+demo_server_SRCS += demo_server.cpp
 
 PROD_LIBS += pvxs Com
 #PROD_SYS_LIBS += event_core
