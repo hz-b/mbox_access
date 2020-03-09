@@ -12,17 +12,31 @@
 using namespace pvxs;
 using namespace std;
 
-TypeDef neutrondef(TypeCode::Struct, "simple_t", {
-                Member(TypeCode::Float64, "value"),
-                Member(TypeCode::Struct, "timeStamp", "time_t", {
-                    Member(TypeCode::UInt64, "secondsPastEpoch"),
-                    Member(TypeCode::UInt32, "nanoseconds"),
-                }),
-            });
+// Custom data type
+TypeDef neutrondef(TypeCode::Struct, "structure",
+{
+    Member(TypeCode::Struct, "timeStamp", "time_t",
+    {
+        Member(TypeCode::UInt64, "secondsPastEpoch"),
+        Member(TypeCode::UInt32, "nanoseconds"),
+        Member(TypeCode::UInt32, "userTag"),
+    }),
+    Member(TypeCode::Struct, "proton_charge", "epics:nt/NTScalar:1.0",
+    {
+        Member(TypeCode::Float64, "value"),
+    }),
+    Member(TypeCode::Struct, "time_of_flight", "epics:nt/NTScalarArray:1.0",
+    {
+        Member(TypeCode::UInt32A, "value"),
+    }),
+    Member(TypeCode::Struct, "pixel", "epics:nt/NTScalarArray:1.0",
+    {
+        Member(TypeCode::UInt32A, "value"),
+    }),
+});
 
 int main(int argc, char* argv[])
 {
-    // To show detail,  `export PVXS_LOG=*=DEBUG`
     logger_config_env();
 
     std::string pv_name = "neutrons";
@@ -32,8 +46,8 @@ int main(int argc, char* argv[])
     pv.open(initial);
 
     server::Server server = server::Config::from_env()
-                            .build()
-                            .addPV(pv_name, pv);
+                                   .build()
+                                   .addPV(pv_name, pv);
 
     std::cout << "Effective config\n"<<server.config();
     std::cout << "Check 'pvxget " << pv_name << "'\n";
@@ -43,14 +57,16 @@ int main(int argc, char* argv[])
 
     epicsEvent done;
     SigInt handle( [&done] ()  { done.trigger(); });
-
-    int count = 42;
+    unsigned long id = 0;
     epicsTimeStamp now;
     while (! done.wait(1))
     {
+      ++id;
       epicsTimeGetCurrent(&now);
       auto val = initial.cloneEmpty();
-      val["value"] = ++count;
+      // val["value"] = id;
+      // Vary a fake 'charge' based on the ID
+      val["proton_charge.value"] = (1 + id % 10)*1e8;
       val["timeStamp.secondsPastEpoch"] = now.secPastEpoch;
       val["timeStamp.nanoseconds"] = now.nsec;
       pv.post(std::move(val));
