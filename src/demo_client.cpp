@@ -11,16 +11,18 @@ using namespace pvxs;
 
 int main()
 {
+    // For full detail,
+    // export PVXS_LOG="*=DEBUG"
     logger_config_env();
 
-    std::string request;
+    std::string request = "field(pixel)";
 
     cout << "Hi!" << endl;
 
     client::Context ctxt = client::Config::from_env().build();
     epicsEvent done;
-    auto op = ctxt.get("demo")
-                  //.pvRequest(request)
+    auto op = ctxt.get("neutrons")
+                  .pvRequest(request)
                   .result([&done](client::Result&& result)
                           {
                             cout << result() << endl;

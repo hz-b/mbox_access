@@ -87,6 +87,8 @@ int main(int argc, char* argv[])
         }
     }
 
+    // For full detail,
+    // export PVXS_LOG="*=DEBUG"
     logger_config_env();
 
     std::string pv_name = "neutrons";
