@@ -9,13 +9,20 @@ using namespace std;
 using namespace pvxs;
 
 
-int main()
+int main(int argc, char* argv[])
 {
     // For full detail,
     // export PVXS_LOG="*=DEBUG"
     logger_config_env();
 
-    std::string request = "field(pixel)";
+    std::string field;
+    std::string request;
+    
+    if (argc == 2)
+    {
+        field = argv[1];
+        request = "field(" + field + ")";
+    }
 
     cout << "Hi!" << endl;
 
@@ -23,9 +30,12 @@ int main()
     epicsEvent done;
     auto op = ctxt.get("neutrons")
                   .pvRequest(request)
-                  .result([&done](client::Result&& result)
+                  .result([&field, &done](client::Result&& result)
                           {
-                            cout << result() << endl;
+                            if (field.empty())
+                                cout << result() << endl;
+                            else
+                                cout << result()[field] << endl;
                             done.signal();
                           })
                   .exec();
