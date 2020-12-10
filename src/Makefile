@@ -6,13 +6,12 @@ include $(TOP)/configure/CONFIG
 #=============================
 
 
-PROD += demo_client
-demo_client_SRCS += demo_client.cpp
+PROD += mbox
+mbox_SRCS += mbox.cpp
 
-PROD += demo_server
-demo_server_SRCS += demo_server.cpp
 
 PROD_LIBS += pvxs Com
+PROD_SYS_LIBS += pthread # event_core
 #PROD_SYS_LIBS += event_core
 
 #PROD_SYS_LIBS_DEFAULT += event_pthreads
@@ -24,4 +23,3 @@ PROD_LIBS += pvxs Com
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
-
