@@ -6,8 +6,8 @@ include $(TOP)/configure/CONFIG
 #=============================
 
 
-PROD += mbox
-mbox_SRCS += mbox.cpp
+PROD += mbox_threaded
+mbox_threaded_SRCS += mbox_threaded.cpp
 
 
 PROD_LIBS += pvxs Com
