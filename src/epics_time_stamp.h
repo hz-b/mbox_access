@@ -1,5 +1,8 @@
 #ifndef _MBOX_EPICS_TIME_STAMP_H_
 #define _MBOX_EPICS_TIME_STAMP_H_
+#include <cassert>
+#include <epicsTime.h>
+
 static inline bool already_passed(epicsTimeStamp &now, epicsTimeStamp &ref, bool ignore_empty=true)
 {
 

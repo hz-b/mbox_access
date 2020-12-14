@@ -226,16 +226,16 @@ int main(int argc, char* argv[])
         epicsTimeStamp run_after;
         bool flag = act_set.isMarked(false, true);
 
-        cerr << "New data in next flagged ? " << flag
-             << " new data: "  << new_data << "?"
-             <<  "fetch and mark"  << fetch_and_mark  << endl;
+        cerr << "New data arrived? Marked; In act_set " << flag
+             << " by sig_atomic_t: "  << new_data
+             << " by fetch and mark "  << fetch_and_mark  << endl;
 
         if(fetch_and_mark){
             act_set.unmark(true, true);
             flag = act_set.isMarked(false, true);
             cerr << "Unmarked. New data in next: " << flag << "?"
                  << "new data"  << new_data << "?"
-             <<  "fetch and mark"  << fetch_and_mark  << endl;
+                 <<  " fetch and mark "  << fetch_and_mark  << endl;
             new_data = false;
         }
 
